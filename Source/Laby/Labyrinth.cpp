@@ -28,12 +28,12 @@ ALabyrinth::ALabyrinth() {
 	Floor->SetupAttachment(DefaultSceneRoot);
 	Floor->bEditableWhenInherited = true;
 
-	DesiredX = 2;
-	DesiredY = 2;
+	DesiredX = 5;
+	DesiredY = 5;
 	X = 0;
 	Y = 0;
-	Size = 100.0;
-
+	BaseCubeSize = 100.0;
+	WallWidthRelative = 0.1;
 }
 
 ALabyrinth::~ALabyrinth() {
@@ -46,15 +46,19 @@ void ALabyrinth::Tick(float DeltaTime) {
 }
 
 void ALabyrinth::OnConstruction(const FTransform& Transform) {
-	SetX(DesiredX);
-	SetY(DesiredY);
-	Generate();
-	Draw();
+	Recreate();
 }
 
 void ALabyrinth::BeginDestroy() {
 	Super::BeginDestroy();
 	DeleteArrays();
+}
+
+void ALabyrinth::Recreate() {
+	SetX(DesiredX);
+	SetY(DesiredY);
+	Generate();
+	Draw();
 }
 
 void ALabyrinth::SetX(int32 NewX) {
@@ -87,33 +91,27 @@ int32 ALabyrinth::GetY() {
 // Called when the game starts or when spawned
 void ALabyrinth::BeginPlay() {
 	Super::BeginPlay();
+	Recreate();
 }
 
 void ALabyrinth::Draw() {
 	Floor->ClearInstances();
 	Wall->ClearInstances();
 	// Fill floor
-	Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(Size * X, Size * Y, -Size), FVector(1.0 * (2 * X + 1), 1.0 * (2 * Y + 1), 1.0)));
-	// Fill node elements
-	for (int32 j = 0; j < Y * 2 + 1; ++j) {
-		for (int32 i = 0; i < X * 2 + 1; ++i) {
-			if (j == 0 || i == 0 || j == Y * 2 || i == X * 2 || (!(j % 2) && !(i % 2))) {
-				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(Size * i, Size * j, 0.0)));
-			}
-		}
-	}
-	// Fill walls
+	Floor->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	// Fill horizontal border walls
 	for (int32 j = 0; j < Y + 1; ++j) {
 		for (int32 i = 0; i < X; ++i) {
 			if (walls_h[j][i]) {
-				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(Size * (i * 2 + 1), Size * j * 2, 0.0)));
+				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0 + 0.5), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0), 0.0), FVector(1.0, WallWidthRelative, 1.0)));
 			}
 		}
-		if (j < Y) {
-			for (int32 i = 0; i < X + 1; ++i) {
-				if (walls_v[j][i]) {
-					Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(Size * i * 2, Size * (j * 2 + 1), 0.0)));
-				}
+	}
+	// Fill vertical border walls
+	for (int32 j = 0; j < Y; ++j) {
+		for (int32 i = 0; i < X + 1; ++i) {
+			if (walls_v[j][i]) {
+				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0 + 0.5), 0.0), FVector(WallWidthRelative, 1.0, 1.0)));
 			}
 		}
 	}

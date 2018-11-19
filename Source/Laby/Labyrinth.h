@@ -33,25 +33,23 @@ public:
 
 	virtual void BeginDestroy() override;
 
-	/** Setter for X */
-	void SetX(int32 NewX);
+	/**
+	 * Actualizes X and Y, reallocates memory if needed, generates new labyrinth and physically builds it
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Tools")
+		void Recreate();
 
-	/** Setter for Y */
-	void SetY(int32 NewY);
-
-	/** Getter for X */
-	int32 GetX();
-
-	/** Getter for Y */
-	int32 GetY();
+	void SetX(int32 NewX); /** Setter for X */
+	void SetY(int32 NewY); /** Setter for Y */
+	int32 GetX();          /** Getter for X */
+	int32 GetY();          /** Getter for Y */
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	/** Recreates Wall and Floor instances according to generated labyrinth */
-	UFUNCTION(BlueprintCallable, Category = "Tools")
-		void Draw();
+	void Draw();
 
 	/** Generates labyrinth walls and stores them in inner arrays */
 	void Generate();
@@ -90,9 +88,13 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties")
 		int32 DesiredY;
 
-	/** Size of each cell */
+	/** Size of base cube mesh */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties")
-		float Size;
+		float BaseCubeSize;
+
+	/** Width of labyrinth wall in relative units compared with size of base cube mesh*/
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties")
+		float WallWidthRelative;
 
 	/** Actual number of cells of labyrinth along X axis */
 	int32 X;
