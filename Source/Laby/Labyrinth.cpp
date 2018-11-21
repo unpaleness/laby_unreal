@@ -20,13 +20,9 @@ ALabyrinth::ALabyrinth() {
 	DefaultSceneRoot->bEditableWhenInherited = true;
 	RootComponent = DefaultSceneRoot;
 
-	Wall = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Wall"));
+	Wall = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("Wall"));
 	Wall->SetupAttachment(DefaultSceneRoot);
 	Wall->bEditableWhenInherited = true;
-
-	Floor = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Floor"));
-	Floor->SetupAttachment(DefaultSceneRoot);
-	Floor->bEditableWhenInherited = true;
 
 	DesiredX = 5;
 	DesiredY = 5;
@@ -95,10 +91,9 @@ void ALabyrinth::BeginPlay() {
 }
 
 void ALabyrinth::Draw() {
-	Floor->ClearInstances();
 	Wall->ClearInstances();
 	// Fill floor
-	Floor->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
 	// Fill horizontal border walls
 	for (int32 j = 0; j < Y + 1; ++j) {
 		for (int32 i = 0; i < X; ++i) {
@@ -115,6 +110,7 @@ void ALabyrinth::Draw() {
 			}
 		}
 	}
+	RegisterAllComponents();
 }
 
 void ALabyrinth::Generate() {

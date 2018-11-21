@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SceneComponent.h"
-#include "Components/InstancedStaticMeshComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Labyrinth.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LabyrinthLog, Log, All);
@@ -72,13 +72,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Components")
 		USceneComponent *DefaultSceneRoot;
 
-	/** This component is a wall of the whole labyrinth */
+	/** This component is a walls of the whole labyrinth */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
-		UInstancedStaticMeshComponent *Wall;
-
-	/** This component is a floor of the whole labyrinth */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
-		UInstancedStaticMeshComponent *Floor;
+		UHierarchicalInstancedStaticMeshComponent *Wall;
 
 	/** Desired number of cells of labyrinth along X axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties")
