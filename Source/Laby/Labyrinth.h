@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SceneComponent.h"
-#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Labyrinth.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LabyrinthLog, Log, All);
@@ -48,7 +49,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/** Recreates Wall and Floor instances according to generated labyrinth */
+	/** Recreates Walls and Floor instances according to generated labyrinth */
 	void Draw();
 
 	/** Generates labyrinth walls and stores them in inner arrays */
@@ -74,7 +75,11 @@ protected:
 
 	/** This component is a walls of the whole labyrinth */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
-		UHierarchicalInstancedStaticMeshComponent *Wall;
+		UInstancedStaticMeshComponent *Walls;
+
+	/** This component is a floor of the whole labyrinth */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
+		UStaticMeshComponent *Floor;
 
 	/** Desired number of cells of labyrinth along X axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties")

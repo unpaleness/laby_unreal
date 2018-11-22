@@ -20,9 +20,13 @@ ALabyrinth::ALabyrinth() {
 	DefaultSceneRoot->bEditableWhenInherited = true;
 	RootComponent = DefaultSceneRoot;
 
-	Wall = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("Wall"));
-	Wall->SetupAttachment(DefaultSceneRoot);
-	Wall->bEditableWhenInherited = true;
+	Walls = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Walls"));
+	Walls->SetupAttachment(DefaultSceneRoot);
+	Walls->bEditableWhenInherited = true;
+
+	Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
+	Floor->SetupAttachment(DefaultSceneRoot);
+	Floor->bEditableWhenInherited = true;
 
 	DesiredX = 5;
 	DesiredY = 5;
@@ -91,14 +95,18 @@ void ALabyrinth::BeginPlay() {
 }
 
 void ALabyrinth::Draw() {
-	Wall->ClearInstances();
+	UE_LOG(LabyrinthLog, Display, TEXT("Clearing instances of walls"));
+	Walls->ClearInstances();
 	// Fill floor
-	Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	//Floor->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	UE_LOG(LabyrinthLog, Display, TEXT("Transforming floor"));
+	Floor->SetRelativeTransform(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
 	// Fill horizontal border walls
 	for (int32 j = 0; j < Y + 1; ++j) {
 		for (int32 i = 0; i < X; ++i) {
 			if (walls_h[j][i]) {
-				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0 + 0.5), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0), 0.0), FVector(1.0, WallWidthRelative, 1.0)));
+				UE_LOG(LabyrinthLog, Display, TEXT("Adding horizontal wall instances"));
+				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0 + 0.5), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0), 0.0), FVector(1.0, WallWidthRelative, 1.0)));
 			}
 		}
 	}
@@ -106,15 +114,15 @@ void ALabyrinth::Draw() {
 	for (int32 j = 0; j < Y; ++j) {
 		for (int32 i = 0; i < X + 1; ++i) {
 			if (walls_v[j][i]) {
-				Wall->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0 + 0.5), 0.0), FVector(WallWidthRelative, 1.0, 1.0)));
+				UE_LOG(LabyrinthLog, Display, TEXT("Adding vertical wall instances"));
+				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0 + 0.5), 0.0), FVector(WallWidthRelative, 1.0, 1.0)));
 			}
 		}
 	}
-	RegisterAllComponents();
 }
 
 void ALabyrinth::Generate() {
-	UE_LOG(LabyrinthLog, Display, TEXT("Generating..."));
+	UE_LOG(LabyrinthLog, Display, TEXT("Start generating labyrinth"));
 	if (walls_h == nullptr && walls_v == nullptr) {
 		AllocateArrays();
 	}
