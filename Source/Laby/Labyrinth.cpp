@@ -46,7 +46,9 @@ void ALabyrinth::Tick(float DeltaTime) {
 }
 
 void ALabyrinth::OnConstruction(const FTransform& Transform) {
-	Recreate();
+	if (!HasActorBegunPlay()) {
+		Recreate();
+	}
 }
 
 void ALabyrinth::BeginDestroy() {
@@ -91,7 +93,7 @@ int32 ALabyrinth::GetY() {
 // Called when the game starts or when spawned
 void ALabyrinth::BeginPlay() {
 	Super::BeginPlay();
-	Recreate();
+	//Recreate();
 }
 
 void ALabyrinth::Draw() {
