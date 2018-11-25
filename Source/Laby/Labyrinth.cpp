@@ -103,20 +103,46 @@ void ALabyrinth::Draw() {
 	UE_LOG(LabyrinthLog, Display, TEXT("Transforming floor"));
 	Floor->SetRelativeTransform(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, 0.0, -BaseCubeSize / 2.0), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
 	// Fill horizontal border walls
-	for (int32 j = 0; j < Y + 1; ++j) {
+	UE_LOG(LabyrinthLog, Display, TEXT("Adding horizontal border walls"));
+	Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, -Y / 2.0 * BaseCubeSize * (1.0 + WallWidthRelative), BaseCubeSize / 2.0), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative, 1.0)));
+	Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(0.0, Y / 2.0 * BaseCubeSize * (1.0 + WallWidthRelative), BaseCubeSize / 2.0), FVector(WallWidthRelative + WallWidthRelative * X + X, WallWidthRelative, 1.0)));
+	// Fill horizontal inner walls
+	// To optimize amount of meshes we need to merge walls in a row
+	for (int32 j = 1; j < Y; ++j) {
+		int32 groupped{ 0 };    // Amount of currently groupped walls
+		int32 head_wall_i{ 0 }; // Index of the first wall in a row
 		for (int32 i = 0; i < X; ++i) {
 			if (walls_h[j][i]) {
-				UE_LOG(LabyrinthLog, Display, TEXT("Adding horizontal wall instances"));
-				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0 + 0.5), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0), BaseCubeSize / 2.0), FVector(1.0, WallWidthRelative, 1.0)));
+				if (groupped == 0) {
+					head_wall_i = i;
+				}
+				++groupped;
+			}
+			if (i > 0 && groupped > 0 && (!walls_h[j][i] || i == X - 1 )) {
+				UE_LOG(LabyrinthLog, Display, TEXT("Adding horizontal wall: row %d, start index %d, size %d"), j, head_wall_i, groupped);
+				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (head_wall_i + (groupped - 1 - X) / 2.0 + 0.5), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0), BaseCubeSize / 2.0), FVector(1.0 + (1.0 + WallWidthRelative) * (groupped - 1), WallWidthRelative, 1.0)));
+				groupped = 0;
 			}
 		}
 	}
 	// Fill vertical border walls
-	for (int32 j = 0; j < Y; ++j) {
-		for (int32 i = 0; i < X + 1; ++i) {
+	UE_LOG(LabyrinthLog, Display, TEXT("Adding vertical border walls"));
+	Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(-X / 2.0 * BaseCubeSize * (1.0 + WallWidthRelative), 0.0, BaseCubeSize / 2.0), FVector(WallWidthRelative, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(X / 2.0 * BaseCubeSize * (1.0 + WallWidthRelative), 0.0, BaseCubeSize / 2.0), FVector(WallWidthRelative, WallWidthRelative + WallWidthRelative * Y + Y, 1.0)));
+	for (int32 i = 1; i < X; ++i) {
+		int32 groupped{ 0 };    // Amount of currently groupped walls
+		int32 head_wall_j{ 0 }; // Index of the first wall in a column
+		for (int32 j = 0; j < Y; ++j) {
 			if (walls_v[j][i]) {
-				UE_LOG(LabyrinthLog, Display, TEXT("Adding vertical wall instances"));
-				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0), BaseCubeSize * (1.0 + WallWidthRelative) * (j - Y / 2.0 + 0.5), BaseCubeSize / 2.0), FVector(WallWidthRelative, 1.0, 1.0)));
+				if (groupped == 0) {
+					head_wall_j = j;
+				}
+				++groupped;
+			}
+			if (j > 0 && groupped > 0 && (!walls_v[j][i] || j == Y - 1)) {
+				UE_LOG(LabyrinthLog, Display, TEXT("Adding vertical wall: column %d, start index %d, size %d"), i, head_wall_j, groupped);
+				Walls->AddInstance(FTransform(FRotator::ZeroRotator.Quaternion(), FVector(BaseCubeSize * (1.0 + WallWidthRelative) * (i - X / 2.0), BaseCubeSize * (1.0 + WallWidthRelative) * (head_wall_j + (groupped - 1 - Y) / 2.0 + 0.5), BaseCubeSize / 2.0), FVector(WallWidthRelative, 1.0 + (1.0 + WallWidthRelative) * (groupped - 1), 1.0)));
+				groupped = 0;
 			}
 		}
 	}
