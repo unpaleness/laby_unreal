@@ -2,9 +2,16 @@
 
 ### Added
 
-- Confortable camera rotation
 - Interesting change of labyrinth (for example, dropping down with whole labyrinth)
 - Comfortable change of labyrinth parameters (size, wall width)
+
+## [0.0.2] - 2018-11-27
+
+### Added
+
+- WASD character control
+- Confortable camera rotation
+- Camera distance change
 
 ## [0.0.1] - 2018-11-25
 
